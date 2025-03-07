@@ -1,0 +1,48 @@
+networks:
+  parch-network:
+    driver: bridge
+    ipam:
+      driver: default
+
+services:
+  parch-nginx:
+    container_name: parch-nginx
+    image: nginx
+    ports:
+      - '8090:80'
+    depends_on:
+      - parch
+    volumes:
+      - ./src:/var/www
+      - ./docker/nginx/app.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - parch-network
+
+  parch:
+    container_name: parch
+    build:
+      context: docker
+      dockerfile: app.Dockerfile
+    image: parch
+    ports:
+      - '9090:9000'
+    volumes:
+      - ./src:/var/www
+    networks:
+      - parch-network
+
+  parch-node:
+    container_name: parch-node
+    build:
+      context: docker
+      dockerfile: node.Dockerfile
+    image: parch/nodejs
+    ports:
+      - '5193:5193'
+    volumes:
+      - ./src:/var/www
+    networks:
+      - parch-network
+
+volumes:
+  parch-mysql-volume:
